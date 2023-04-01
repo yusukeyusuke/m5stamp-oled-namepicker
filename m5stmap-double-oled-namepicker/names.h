@@ -18,4 +18,5 @@ String* nnn[] = {names, names2, names3};
 
 String classNames[] = {"クラス1-1", "CLASS2-2", "CLASS3-1"};
 int nums[]={3,3,3};
+const int CLASS_NUM = 3;
 const int MAX_NAMES = 3;
