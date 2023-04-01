@@ -77,8 +77,9 @@ public:
 //      cfg.pin_sda = lgfx::samd21::PORT_A | 8; // I2CのSDAをピン番号を設定
 //      cfg.pin_scl = lgfx::samd21::PORT_A | 9; // I2CのSCLをピン番号を設定
       cfg.pin_scl = 21;
-      cfg.pin_sda = 18;
+      cfg.pin_sda = 19;
       cfg.i2c_addr    = 0x3C;       // I2Cデバイスのアドレス
+      cfg.i2c_port =0;
 
       _bus_instance.config(cfg);    // 設定値をバスに反映します。
       _panel_instance.setBus(&_bus_instance);      // バスをパネルにセットします。
@@ -95,7 +96,7 @@ public:
       cfg.panel_height     =    64;  // 実際に表示可能な高さ
       //cfg.offset_x         =     0;  // パネルのX方向オフセット量
       //cfg.offset_y         =     0;  // パネルのY方向オフセット量
-      //cfg.offset_rotation  =     0;  // 回転方向の値のオフセット 0~7 (4~7は上下反転)
+      cfg.offset_rotation  =     2;  // 回転方向の値のオフセット 0~7 (4~7は上下反転)
       //cfg.dummy_read_pixel =     8;  // ピクセル読出し前のダミーリードのビット数
       //cfg.dummy_read_bits  =     1;  // ピクセル以外のデータ読出し前のダミーリードのビット数
       //cfg.readable         =  true;  // データ読出しが可能な場合 trueに設定
@@ -141,7 +142,7 @@ class LGFX2 : public lgfx::LGFX_Device
 //lgfx::Panel_ILI9488     _panel_instance;
 //lgfx::Panel_IT8951      _panel_instance;
 //lgfx::Panel_SH110x      _panel_instance; // SH1106, SH1107
-lgfx::Panel_SSD1306     _panel_instance;
+lgfx::Panel_SSD1306     _panel_instance2;
 //lgfx::Panel_SSD1327     _panel_instance;
 //lgfx::Panel_SSD1331     _panel_instance;
 //lgfx::Panel_SSD1351     _panel_instance; // SSD1351, SSD1357
@@ -154,7 +155,7 @@ lgfx::Panel_SSD1306     _panel_instance;
 
 // パネルを接続するバスの種類にあったインスタンスを用意します。
 //lgfx::Bus_SPI       _bus_instance;   // SPIバスのインスタンス
-lgfx::Bus_I2C       _bus_instance;   // I2Cバスのインスタンス (ESP32のみ)
+lgfx::Bus_I2C       _bus_instance2;   // I2Cバスのインスタンス (ESP32のみ)
 //lgfx::Bus_Parallel8 _bus_instance;   // 8ビットパラレルバスのインスタンス (ESP32のみ)
 
 public:
@@ -164,7 +165,7 @@ public:
   LGFX2(void)
   {
     { // バス制御の設定を行います。
-      auto cfg = _bus_instance.config();    // バス設定用の構造体を取得します。
+      auto cfg = _bus_instance2.config();    // バス設定用の構造体を取得します。
 
 
 // ※ ピン番号の設定は、Arduino互換用のピン番号ではなく、"PA07" 等の実際のMCUのポート番号を指定します。
@@ -176,15 +177,17 @@ public:
 //      cfg.pin_sda = lgfx::samd21::PORT_A | 8; // I2CのSDAをピン番号を設定
 //      cfg.pin_scl = lgfx::samd21::PORT_A | 9; // I2CのSCLをピン番号を設定
       cfg.pin_scl = 21;
-      cfg.pin_sda = 19;
+//      cfg.pin_scl = 32;
+      cfg.pin_sda = 18;
       cfg.i2c_addr    = 0x3C;       // I2Cデバイスのアドレス
-
-      _bus_instance.config(cfg);    // 設定値をバスに反映します。
-      _panel_instance.setBus(&_bus_instance);      // バスをパネルにセットします。
+      cfg.i2c_port =1;
+      
+      _bus_instance2.config(cfg);    // 設定値をバスに反映します。
+      _panel_instance2.setBus(&_bus_instance2);      // バスをパネルにセットします。
     }
 
     { // 表示パネル制御の設定を行います。
-      auto cfg = _panel_instance.config();    // 表示パネル設定用の構造体を取得します。
+      auto cfg = _panel_instance2.config();    // 表示パネル設定用の構造体を取得します。
 
       // ※ 以下の設定値はパネル毎に一般的な初期値が設定されていますので、不明な項目はコメントアウトして試してみてください。
 
@@ -194,7 +197,7 @@ public:
       cfg.panel_height     =    64;  // 実際に表示可能な高さ
       //cfg.offset_x         =     0;  // パネルのX方向オフセット量
       //cfg.offset_y         =     0;  // パネルのY方向オフセット量
-      //cfg.offset_rotation  =     0;  // 回転方向の値のオフセット 0~7 (4~7は上下反転)
+      cfg.offset_rotation  =     2;  // 回転方向の値のオフセット 0~7 (4~7は上下反転)
       //cfg.dummy_read_pixel =     8;  // ピクセル読出し前のダミーリードのビット数
       //cfg.dummy_read_bits  =     1;  // ピクセル以外のデータ読出し前のダミーリードのビット数
       //cfg.readable         =  true;  // データ読出しが可能な場合 trueに設定
@@ -203,22 +206,24 @@ public:
       //cfg.dlen_16bit       = false;  // データ長を16bit単位で送信するパネルの場合 trueに設定
       //cfg.bus_shared       =  true;  // SDカードとバスを共有している場合 trueに設定(drawJpgFile等でバス制御を行います)
 
-      _panel_instance.config(cfg);
+      _panel_instance2.config(cfg);
     }
 
-    setPanel(&_panel_instance); // 使用するパネルをセットします。
+    setPanel(&_panel_instance2); // 使用するパネルをセットします。
   } 
 };
 
-static LGFX lcd;
-static LGFX_Sprite canvas(&lcd);
-static LGFX2 lcd2;
-static LGFX_Sprite canvas2(&lcd2);
+static LGFX lcd2;
+static LGFX2 lcd;
+static LGFX_Sprite canvas(&lcd );
 
 
 int pushButton = 39;
 int classButton = 26;
 int nameButton = 36;
+
+int classButtonPress = 0;
+int nameButtonPress = 0;
 
 int lcdPower = 22;
 int lcdGnd = 25;
@@ -246,23 +251,28 @@ void randomizeNameOrder(){
 
 void lcdInits() {
   lcd.init();
+  lcd2.init();
+
   canvas.setTextWrap(false);
-  canvas.createSprite(384, 32);
+  canvas.createSprite(256, 64);
   canvas.fillScreen(TFT_BLACK);
   canvas.setTextColor(TFT_WHITE);
   canvas.setCursor(0,0);
-  canvas.setFont(&fonts::lgfxJapanGothic_32);
-  //canvas.println("日本語");
-  //canvas.printf("%d",ttt);
-  uint8_t white = 0x0FF;
-//  canvas.fillRect(5,5,10,10,white);
-//  canvas.pushSprite(0, 0);
   canvas.setPivot(0,0);
 
+  //canvas.fillRect(0,0,32,32,TFT_WHITE);
+  //canvas.pushRotateZoom(0.0, 0, 0, 1.0 , 1.0); // 画面中心に角度angle、幅2.5倍、高さ3倍で描画
+  //canvas.pushSprite(0, 0);
 }
 
 void setup(){
-  Serial.begin(19200);
+  //setCpuFrequencyMhz(50);
+  bootCount++;
+  if(bootCount > 30000){
+    bootCount = 1;
+  }
+  randomSeed(bootCount);
+  //Serial.begin(19200);
   pinMode(pushButton, INPUT);
   pinMode(classButton, INPUT_PULLDOWN);
   pinMode(nameButton, INPUT_PULLDOWN);
@@ -273,12 +283,13 @@ void setup(){
   digitalWrite(lcdGnd, LOW);
   delay(50);
   lcdInits();
-  //setCpuFrequencyMhz(10);
-  Serial.println("SETUP DONE");
+  //Serial.println("BOOTCOUNT");
+  //Serial.println(bootCount);
+  //Serial.println("SETUP DONE");
   
 }
 
-int KEEPTIME = 200;
+int KEEPTIME = 50;
 int keepWake = KEEPTIME;
 float dir=-0.01;
 float x=1;
@@ -296,61 +307,86 @@ void loop(){
   }
   */
   if(digitalRead(classButton)==HIGH){
-    Serial.println("CLASS PUSH");
-    currentClass++;
-    currentClass = currentClass%3;
-    randomizeNameOrder();
-    currentName=0;
-    keepWake = KEEPTIME * 2;
-    canvas.fillScreen(TFT_BLACK);
-    canvas.fillRect(0,0,12,32,TFT_WHITE);
-    canvas.setFont(&fonts::Font2);
-    canvas.setTextColor(TFT_BLACK, TFT_WHITE);
-    canvas.setCursor(2,0);
-    canvas.printf("%d",(currentClass+1)/10);
-    canvas.setCursor(2,16);
-    canvas.printf("%d",(currentClass+1)%10);
-    canvas.setTextColor(TFT_WHITE, TFT_BLACK);
-    canvas.setFont(&fonts::lgfxJapanGothic_16);
-    canvas.setCursor(14,12);
-    canvas.println(classNames[currentClass]);
-    canvas.setPivot(0,0);
-    canvas.pushRotateZoom(0.0, 0, 0, 1.0 , 1.0); // 画面中心に角度angle、幅2.5倍、高さ3倍で描画
+    if(classButtonPress == 1){
+      // inhibit key repeat
+    } else {
+      classButtonPress = 1;
+      //Serial.println("CLASS PUSH");
+      currentClass++;
+      currentClass = currentClass%CLASS_COUNT;
+      randomizeNameOrder();
+      currentName=0;
+      keepWake = KEEPTIME * 1.5+2;
+      canvas.fillScreen(TFT_BLACK);
+      canvas.fillRect(0,0,12,64,TFT_WHITE);
+      canvas.setFont(&fonts::Font2);
+      canvas.setTextColor(TFT_BLACK, TFT_WHITE);
+      canvas.setCursor(2,0);
+      canvas.printf("%d",(currentClass+1)/10);
+      canvas.setCursor(2,16);
+      canvas.printf("%d",(currentClass+1)%10);
+      canvas.setTextColor(TFT_WHITE, TFT_BLACK);
+      canvas.setFont(&fonts::lgfxJapanGothic_32);
+      canvas.setCursor(14,12);
+      canvas.println(classNames[currentClass]);
+      canvas.setPivot(0,0);
+      //canvas.pushRotateZoom(0.0, 0, 0, 1.0 , 1.0); // 画面中心に角度angle、幅2.5倍、高さ3倍で描画
+      canvas.pushSprite(0, 0);
+      canvas.pushSprite(&lcd2, -128, 0);
+    }
+  }else{
+    classButtonPress = 0;
   }
 
   if(keepWake == KEEPTIME + 1){
-    firstTime = 1;
+    firstTime = 2;
   }
   
-  if(digitalRead(nameButton)==HIGH || firstTime == 1){
-    Serial.println("NAME PUSH");
-    Serial.println(currentName);
-    int num_name=nameOrder[currentName];
-    currentName++;
-    if(currentName >= nums[currentClass]){
-      currentName = 0;
-      randomizeNameOrder();
+  if(digitalRead(nameButton)==HIGH || firstTime == 1 || firstTime == 2){
+    if(nameButtonPress == 1){
+      // inhibit key repeat
+    } else {
+      nameButtonPress = 1;
+      if(firstTime == 1){
+        randomizeNameOrder();
+      }
+      //Serial.println("NAME PUSH");
+      //Serial.println(currentName);
+      int num_name=nameOrder[currentName];
+      currentName++;
+      if(currentName >= nums[currentClass]){
+        currentName = 0;
+        randomizeNameOrder();
+      }
+      
+      firstTime = 0;
+      keepWake = KEEPTIME;
+  
+      canvas.fillScreen(TFT_BLACK);
+  
+      canvas.setTextColor(TFT_WHITE, TFT_BLACK);
+      canvas.setFont(&fonts::lgfxJapanGothic_16);
+      canvas.setCursor(0,0);
+      canvas.println(nnn[currentClass][num_name*2+1]);
+      canvas.setFont(&fonts::lgfxJapanGothic_32);
+      canvas.setCursor(0,24);
+      canvas.println(nnn[currentClass][num_name*2]);
+  
+      canvas.fillRect(256-32,0,256,16,TFT_WHITE);
+      canvas.setTextColor(TFT_BLACK, TFT_WHITE);
+      canvas.setFont(&fonts::Font2);
+      canvas.setCursor(256-32+4,0);
+      canvas.printf("%d",(num_name+1)/10);
+      canvas.setCursor(256-32+4+16,0);
+      canvas.printf("%d",(num_name+1)%10);
+  
+      canvas.setPivot(0,0);
+      canvas.pushSprite(0, 0);
+      canvas.pushSprite(&lcd2, -128, 0);
+      // canvas.pushRotateZoom(0.0, 0, 0, 1.0 , 1.0); // 画面中心に角度angle、幅2.5倍、高さ3倍で描画
     }
-    
-    firstTime = 0;
-    keepWake = KEEPTIME;
-    canvas.fillScreen(TFT_BLACK);
-    canvas.fillRect(0,0,12,32,TFT_WHITE);
-    canvas.setFont(&fonts::Font2);
-    canvas.setTextColor(TFT_BLACK, TFT_WHITE);
-    canvas.setCursor(2,0);
-    canvas.printf("%d",(num_name+1)/10);
-    canvas.setCursor(2,16);
-    canvas.printf("%d",(num_name+1)%10);
-    canvas.setTextColor(TFT_WHITE, TFT_BLACK);
-    canvas.setFont(&fonts::lgfxJapanGothic_12);
-    canvas.setCursor(14,0);
-    canvas.println(nnn[currentClass][num_name*2+1]);
-    canvas.setFont(&fonts::lgfxJapanGothic_16);
-    canvas.setCursor(14,12);
-    canvas.println(nnn[currentClass][num_name*2]);
-    canvas.setPivot(0,0);
-    canvas.pushRotateZoom(0.0, 0, 0, 1.0 , 1.0); // 画面中心に角度angle、幅2.5倍、高さ3倍で描画
+  }else{
+    nameButtonPress = 0;
   }
     //canvas.pushRotateZoom(64, 16, aa,x , 1.0); // 画面中心に角度angle、幅2.5倍、高さ3倍で描画
     /*
@@ -360,13 +396,17 @@ void loop(){
   }
   */
   if(keepWake%10==0){
-  Serial.println("KeepWake");
-  Serial.println(keepWake);
+  //Serial.println("KeepWake");
+  //Serial.println(keepWake);
   }
   
   keepWake--;
   if(keepWake <= 0){
-      Serial.println("SLEEEEEEEEP");
+      //Serial.println("SLEEEEEEEEP");
+      canvas.fillScreen(TFT_BLACK);
+      canvas.pushSprite(0, 0);
+      canvas.pushSprite(&lcd2, -128, 0);
+
       esp_sleep_enable_ext1_wakeup( BIT64(GPIO_NUM_26) | BIT64(GPIO_NUM_36) ,ESP_EXT1_WAKEUP_ANY_HIGH);
       esp_deep_sleep_start();
   }
