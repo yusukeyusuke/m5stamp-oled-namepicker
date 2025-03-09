@@ -234,6 +234,7 @@ RTC_DATA_ATTR int currentName=0;
 RTC_DATA_ATTR byte nameOrder[MAX_NAMES];
 
 void randomizeNameOrder(){
+  randomSeed(millis()); // CPU起動からの時刻をシードに設定
   int num = nums[currentClass];
   for(int i=0;i<num;i++){
     nameOrder[i]=i;
@@ -313,7 +314,7 @@ void loop(){
       classButtonPress = 1;
       //Serial.println("CLASS PUSH");
       currentClass++;
-      currentClass = currentClass%CLASS_COUNT;
+      currentClass = currentClass%(sizeof(nums) / sizeof(nums[0])); // nums配列の範囲内に収める
       randomizeNameOrder();
       currentName=0;
       keepWake = KEEPTIME * 1.5+2;
